@@ -108,6 +108,9 @@ struct paquet * defiler(struct tapis * t){
     while(estVide (t) && compteur > 0){
         pthread_cond_wait(&t->condCons, &t->mutex);
     }
+    if(estPlein(tapis)){
+        pthread_cond_wait(&tapis->condProd)
+    }
     struct paquet * p = t->fifo[t->debut];
     t->quantite--;
     t->debut = (t->debut + 1) % t->capacite;
