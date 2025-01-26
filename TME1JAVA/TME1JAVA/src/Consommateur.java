@@ -32,7 +32,7 @@ public class Consommateur implements Runnable {
 		// TODO Auto-generated method stub
 		while (getCompteur() > 0) {
 			Paquet paquet = getFifo().defiler(getCompteur());
-			System.out.println("C " + getId() + " mange " + paquet.getNom());
+			System.out.println("C" + getId() + " mange " + paquet.getNom());
 		}
 	}
 
