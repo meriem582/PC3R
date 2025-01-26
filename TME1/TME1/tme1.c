@@ -18,7 +18,7 @@ struct tapis {
     struct paquet ** fifo;
     int capacite;
     int debut;
-    int fin;
+    int quantite;
     // on a utiliser les threads POSIX (pthreads) pour la synchronisation {mutex, condCons, condProd}
     pthread_mutex_t mutex;
     // condition pour que le consomateur ne consomme pas si la file est vide
@@ -42,12 +42,12 @@ struct consomateur{
 
 // fonction pour dire que le tapis est vide    
 int estVide(struct tapis * tapis){
-    return tapis->fin == 0;
+    return tapis->quantite == 0;
 }
 
 // fonction pour dire que le tapis est plein
 int estPlein(struct tapis * tapis){
-    return tapis->fin == tapis->capacite ;
+    return tapis->quantite == tapis->capacite ;
 }
 
 // fonction pour initialiser le paquet
@@ -70,7 +70,7 @@ struct tapis * initTapis(int capacite){
     tapis->fifo = malloc(capacite * sizeof(struct paquet));
     tapis->capacite = capacite;
     tapis->debut = 0;
-    tapis->fin = 0;
+    tapis->quantite = 0;
     pthread_mutex_init(&tapis->mutex, NULL);
     pthread_cond_init(&tapis->condCons, NULL);
     pthread_cond_init(&tapis->condProd, NULL);
@@ -92,9 +92,9 @@ void enfiler(struct tapis * tapis, struct paquet * paquet){
     if(estVide(tapis)){
         pthread_cond_signal(&tapis->condCons);
     }
-    tapis->fifo[ (tapis->debut + tapis->fin
+    tapis->fifo[ (tapis->debut + tapis->quantite
     ) % tapis->capacite ] = paquet;
-    tapis->fin++;
+    tapis->quantite++;
     // déverrouiller le mutex
     pthread_mutex_unlock(&tapis->mutex);
     // on signale que le tapis n'est plus vide
@@ -109,7 +109,7 @@ struct paquet * defiler(struct tapis * t){
         pthread_cond_wait(&t->condCons, &t->mutex);
     }
     struct paquet * p = t->fifo[t->debut];
-    t->fin--;
+    t->quantite--;
     t->debut = (t->debut + 1) % t->capacite;
     compteur --;
     pthread_mutex_unlock(&t->mutex);
