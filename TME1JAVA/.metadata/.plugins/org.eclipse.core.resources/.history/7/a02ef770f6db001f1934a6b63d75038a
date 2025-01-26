@@ -1,0 +1,53 @@
+
+public class Tapis {
+	private Paquet[] fifo;
+	private int capacite;
+	private int debut;
+	private int fin;
+	public Tapis(int capacite) {
+		this.capacite=capacite;
+		this.debut=0;
+		this.fin=0;
+		this.fifo = new Paquet[capacite];
+	}
+	public Paquet[] getFifo() {
+		return fifo;
+	}
+	public void setFifo(Paquet[] fifo) {
+		this.fifo = fifo;
+	}
+	public int getCapacite() {
+		return capacite;
+	}
+	public void setCapacite(int capacite) {
+		this.capacite = capacite;
+	}
+	public int getDebut() {
+		return debut;
+	}
+	public void setDebut(int debut) {
+		this.debut = debut;
+	}
+	public int getFin() {
+		return fin;
+	}
+	public void setFin(int fin) {
+		this.fin = fin;
+	}
+	public boolean estVide() {
+		if(this.fin==0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	public boolean estPlein() {
+		if(this.fin==this.capacite) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	
+}

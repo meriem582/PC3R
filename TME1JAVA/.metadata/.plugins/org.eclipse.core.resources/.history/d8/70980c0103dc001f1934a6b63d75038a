@@ -1,0 +1,48 @@
+
+public class Consommateur implements Runnable {
+	private int id;
+	private int compteur;
+	private Tapis fifo;
+
+	public Consommateur(int compteur, int id, Tapis fifo) {
+		// TODO Auto-generated constructor stub
+		this.id = id;
+		this.setCompteur(compteur);
+		this.fifo = fifo;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+	public Tapis getFifo() {
+		return fifo;
+	}
+
+	public void setFifo(Tapis fifo) {
+		this.fifo = fifo;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (getCompteur() > 0) {
+			Paquet paquet = getFifo().defiler(getCompteur());
+			System.out.println("C " + getId() + " mange " + paquet.getNom());
+		}
+
+	}
+
+	public int getCompteur() {
+		return compteur;
+	}
+
+	public void setCompteur(int compteur) {
+		this.compteur = compteur;
+	}
+
+}

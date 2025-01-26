@@ -1,0 +1,87 @@
+
+public class Tapis {
+	private Paquet[] fifo;
+	private int capacite;
+	private int debut;
+	private int quantite;
+	public Tapis(int capacite) {
+		this.capacite=capacite;
+		this.debut=0;
+		this.quantite=0;
+		this.fifo = new Paquet[capacite];
+	}
+	public Paquet getFifo(int i) {
+		return fifo[i];
+	}
+	public void setFifo(Paquet[] fifo) {
+		this.fifo = fifo;
+	}
+	public int getCapacite() {
+		return capacite;
+	}
+	public void setCapacite(int capacite) {
+		this.capacite = capacite;
+	}
+	public int getDebut() {
+		return debut;
+	}
+	public void setDebut(int debut) {
+		this.debut = debut;
+	}
+	public int getQuantite() {
+		return quantite;
+	}
+	public void setQuantite(int fin) {
+		this.quantite = fin;
+	}
+	public boolean estVide() {
+		if(this.quantite==0) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	public boolean estPlein() {
+		if(this.quantite==this.capacite) {
+			return true;
+		}else {
+			return false;
+		}
+	}
+	
+	public void enfiler(Paquet paquet) {
+		synchronized (this) {
+			while(this.estPlein()){
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					e.printStackTrace();
+				}
+			}
+			if(this.estVide()) {
+				this.notify();
+			}
+			this.fifo[(getDebut()+getQuantite())% getCapacite()]=paquet;
+			setQuantite(getQuantite()+1);
+		}
+	}
+	public Paquet defiler(int compteur) {
+		synchronized (this) {
+			while(this.estVide()) {
+				try {
+					this.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(this.estPlein()) {
+				this.notify();
+			}
+			Paquet paquet=getFifo(getDebut());
+			setQuantite(getQuantite()-1);
+			setDebut((getDebut()+1 )% getCapacite()) ;
+		}
+	}
+	
+}

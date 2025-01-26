@@ -1,0 +1,59 @@
+
+public class Producteur implements Runnable {
+	private String nom;
+	private int cibleAproduire;
+	private int nombreProduitTotal;
+	private Tapis fifo;
+
+	public Producteur(String nom, int cibleAproduire, int nombreProduitTotal, Tapis fifo) {
+		// TODO Auto-generated constructor stub
+		this.nom = nom;
+		this.cibleAproduire = cibleAproduire;
+		this.nombreProduitTotal = nombreProduitTotal;
+		this.fifo = fifo;
+	}
+
+	public String getNom() {
+		return nom;
+	}
+
+	public void setNom(String nom) {
+		this.nom = nom;
+	}
+
+	public int getCibleAproduire() {
+		return cibleAproduire;
+	}
+
+	public void setCibleAproduire(int cibleAproduire) {
+		this.cibleAproduire = cibleAproduire;
+	}
+
+	public int getNombreProduitTotal() {
+		return nombreProduitTotal;
+	}
+
+	public void setNombreProduitTotal(int nombreProduitTotal) {
+		this.nombreProduitTotal = nombreProduitTotal;
+	}
+
+	public Tapis getFifo() {
+		return fifo;
+	}
+
+	public void setFifo(Tapis fifo) {
+		this.fifo = fifo;
+	}
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		while (getCibleAproduire() != getNombreProduitTotal()) {
+			Paquet paquet = new Paquet(getNom() + " " + getNombreProduitTotal());
+			getFifo().enfiler(paquet);
+			setNombreProduitTotal(getNombreProduitTotal() + 1);
+		}
+
+	}
+
+}

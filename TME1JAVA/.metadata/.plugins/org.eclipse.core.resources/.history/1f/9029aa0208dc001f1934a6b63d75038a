@@ -1,0 +1,42 @@
+
+public class Main {
+
+	 public static void main(String[] args) {
+	        ProdCons prodCons = new ProdCons();
+	        ProdCons.Tapis tapis = prodCons.new Tapis(size_tapis);
+	        Thread[] prods = new Thread[nb_prod];
+	        Thread[] cons = new Thread[nb_con];
+	        for (int i = 0; i < nb_prod; i++) {
+	            Thread prod = new Thread(prodCons.new Prod(produits[i], cible_production, tapis));
+	            prods[i] = prod;
+	            prod.start();
+	        }
+
+	        for (int j = 0; j < nb_con; j++) {
+	            Thread conso = new Thread(prodCons.new Cons(j, tapis));
+	            cons[j] = conso;
+	            conso.start();
+	        }
+
+	        int i = 0;
+	        while (i < nb_prod) {
+	            try {
+	                prods[i].join();
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+	            i++;
+	        }
+
+	        int j = 0;
+	        while (j < nb_con) {
+	            try {
+	                cons[j].join();
+	            } catch (InterruptedException e) {
+	                e.printStackTrace();
+	            }
+	            j++;
+	        }
+	    }
+
+}

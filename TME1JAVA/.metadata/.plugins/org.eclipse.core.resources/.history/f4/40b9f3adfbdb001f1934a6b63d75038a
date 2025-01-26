@@ -1,0 +1,16 @@
+
+public class Producteur {
+	private String nom;
+	private int cibleAproduire;
+	private int nombreProduitTotal;
+	private Tapis fifo;
+
+	public Producteur(String nom, int cibleAproduire, int nombreProduitTotal, Tapis fifo) {
+		// TODO Auto-generated constructor stub
+		this.nom = nom;
+		this.cibleAproduire = cibleAproduire;
+		this.nombreProduitTotal = nombreProduitTotal;
+		this.fifo = fifo;
+	}
+
+}
