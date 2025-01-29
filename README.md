@@ -19,20 +19,17 @@ Suivez les instructions ci-dessous pour exécuter chaque version.
 
 ## 🖥️ Commandes d'exécution
 
-### 📂 TME1C  
+### 📂 TME1C 
 Compilez et exécutez le programme en C avec les commandes suivantes :  
-```sh
 gcc -o tme1 tme1.c
 ./tme1
 
 ### 📂 TME1JAVA
 Compilez et exécutez le programme en Java avec :
-```sh
 javac Main.java
 java Main
 
 ### 📂 TME1RUST
-```sh
 Lancez directement le programme en Rust avec :
 cargo run
 
