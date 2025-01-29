@@ -27,10 +27,12 @@ gcc -o tme1 tme1.c
 
 ### 📂 TME1JAVA
 Compilez et exécutez le programme en Java avec :
+```sh
 javac Main.java
 java Main
 
 ### 📂 TME1RUST
+```sh
 Lancez directement le programme en Rust avec :
 cargo run
 
