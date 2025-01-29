@@ -1,4 +1,3 @@
-
 // MERIEM BENAISSA 
 // AHMED YOURA
 // on a utiliser copilot
@@ -31,7 +30,7 @@ struct producteur{
     char * nom;
     int cibleAproduire;
     int nombreProduitTotal;
-    // on met le tapis car le produit est enfilé dedans
+    // on met le tapis car le produit est enfilé dedans (La ressource partagée)
     struct tapis * tapis;
 };
 
@@ -99,26 +98,26 @@ void enfiler(struct tapis * tapis, struct paquet * paquet){
     pthread_mutex_unlock(&tapis->mutex);
     // on signale que le tapis n'est plus vide
     pthread_cond_signal(&tapis->condCons);
-    
 }
 
 // fonction pour defiler un paquet
-struct paquet * defiler(struct tapis * t){
-    pthread_mutex_lock(&t->mutex);
-    while(estVide (t) && compteur > 0){
-        pthread_cond_wait(&t->condCons, &t->mutex);
+struct paquet * defiler(struct tapis * tapis){
+    pthread_mutex_lock(&tapis->mutex);
+    while(estVide (tapis) && compteur > 0){
+        pthread_cond_wait(&tapis->condCons, &tapis->mutex);
     }
     if(estPlein(tapis)){
-        pthread_cond_wait(&tapis->condProd)
+        pthread_cond_signal(&tapis->condProd);
     }
-    struct paquet * p = t->fifo[t->debut];
-    t->quantite--;
-    t->debut = (t->debut + 1) % t->capacite;
+    struct paquet * p = tapis->fifo[tapis->debut];
+    tapis->quantite--;
+    tapis->debut = (tapis->debut + 1) % tapis->capacite;
     compteur --;
-    pthread_mutex_unlock(&t->mutex);
-    pthread_cond_signal(&t->condProd);
+    pthread_mutex_unlock(&tapis->mutex);
+    pthread_cond_signal(&tapis->condProd);
     return p;
 }
+
 
 void * production(void * prod)
 {
@@ -142,7 +141,7 @@ void * consommation(void * cons)
     while(compteur>0){
         struct paquet * paquet = defiler(consomateur->tapis);
         if(compteur > 0){
-            printf("Consomateur %d a consomé le paquet %s\n", consomateur->id, paquet->nom);
+            printf("C%d mange %s\n", consomateur->id, paquet->nom);
             libererPaquet(paquet);
         }        
     }
