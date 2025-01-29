@@ -1,10 +1,10 @@
 # 🚀 PC3R
 
-ℹ️ Prérequis
-Avant d’exécuter les programmes, assurez-vous d’avoir installé :
-✅ GCC pour la compilation en C
-✅ Java JDK pour exécuter Java
-✅ Rust & Cargo pour exécuter Rust
+-ℹ️ Prérequis
+-Avant d’exécuter les programmes, assurez-vous d’avoir installé :
+-✅ GCC pour la compilation en C
+-✅ Java JDK pour exécuter Java
+-✅ Rust & Cargo pour exécuter Rust
 
 ## 📌 TME1 - Exécution des programmes
 
