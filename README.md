@@ -39,6 +39,10 @@ Lancez directement le programme en Rust avec :
 cargo run
 ```
 
+### 📂 TME3
+```
+go run main.go .\stop_times.txt
+```
 
  
 
