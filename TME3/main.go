@@ -50,16 +50,17 @@ func worker(canal_lec chan string, canal_ser chan coupleAenvoyer, canal_red chan
 			/* envoie sur le canal du seveur*/
 			canalpaquetResultat := make(chan paquet)
 			canal_ser <- coupleAenvoyer{paquet: paquet0, canalpaquetResultat: canalpaquetResultat}
-
+			fmt.Println("Travailleur a reçu un paquet")
 			paquetResultat := <-canalpaquetResultat
 			canal_red <- paquetResultat
+			fmt.Println("Travailleur a envoyé au redacteur le paquet resultat")
 		}(ligne_de_donnees)
 	}
 }
 
 func diff(departArg string, arriveArg string) int {
-	arrive, _ := time.Parse("00:00:00", departArg)
-	depart, _ := time.Parse("00:00:00", arriveArg)
+	arrive, _ := time.Parse("15:04:05", arriveArg)
+	depart, _ := time.Parse("15:04:05", departArg)
 	diff := depart.Sub(arrive)
 	return int(diff.Minutes())
 }
@@ -68,7 +69,9 @@ func serveur_de_calcul(canal_ser chan coupleAenvoyer) {
 	for true {
 		couple := <-canal_ser
 		go func(c coupleAenvoyer) {
+			fmt.Println("le calcule de la différence entre :", c.paquet.depart, "  et  ", c.paquet.arrive)
 			c.paquet.arret = diff(c.paquet.depart, c.paquet.arrive)
+			fmt.Println("La diff différence : ", c.paquet.arret)
 			c.canalpaquetResultat <- c.paquet
 		}(couple)
 	}
