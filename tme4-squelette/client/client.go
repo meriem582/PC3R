@@ -132,14 +132,14 @@ func (p *personne_emp) initialise() {
 statut du paquet `a C.*/
 
 func (p *personne_emp) travaille() {
-	fmt.Println("travail de la personne : ", p.personne, " statut : ", p.statut)
+	fmt.Println("travail de la personne : ", p.vers_string())
 	if len(p.tabAFaire) > 0 {
 		p.personne = p.tabAFaire[0](p.personne) //application de la fonction de travail
 		p.tabAFaire = p.tabAFaire[1:]           //suppression de la fonction de travail
 	} else {
 		p.statut = "C" //passage du statut à C
 	}
-	fmt.Println("Résultat du travaille sur la personne : ", p.personne, " statut : ", p.statut)
+	fmt.Println("Résultat du travaille sur la personne : ", p.vers_string())
 }
 
 /*vers_string retourne une chaîne de caractères contenant le nom, le prénom, l'âge et le sexe de la personne*/
@@ -263,7 +263,7 @@ func ouvrier(cOutGestion chan personne_int, cInGestion chan personne_int, cInCol
 		case "R":
 			fmt.Println("avant le travail sur la personne", p.vers_string())
 			p.travaille()
-			fmt.Println("resultat du travaille sur la personne", p.vers_string())
+			fmt.Println("Résultat du travaille sur la personne", p.vers_string())
 			cInGestion <- p
 			// si le paquet est Fini, ils lenvoient au collecteur
 		case "C":

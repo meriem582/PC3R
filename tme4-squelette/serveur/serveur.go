@@ -103,20 +103,29 @@ func mainteneur(f string, id int, canalRetour chan string) {
 // elle attend sur la socketi un message content un nom de methode et un identifiant et appelle le mainteneur avec ces arguments
 // elle recupere le resultat du mainteneur et l'envoie sur la socket, puis ferme la socket
 func gere_connection(cnx net.Conn) {
-	// A FAIRE
 	for {
 		m, _ := bufio.NewReader(cnx).ReadString('\n') // lit un message sur la socket
-		request := strings.TrimSuffix(m, "\n")        // recupere la requete du client
-		tab := strings.Split(request, ",")            // separe la requete en deux parties
-		id, _ := strconv.Atoi(tab[0])                 // recupere l'id
-		f := tab[1]                                   // recupere la methode
-		canalRetour := make(chan string)              // cree un canal de retour
+		request := strings.TrimSuffix(m, "\n")        // récupère la requête du client
+		tab := strings.Split(request, ",")            // sépare la requête en deux parties
+
+		if len(tab) < 2 { // Vérifie que la requête est bien formée
+			cnx.Write([]byte("Erreur: requête invalide\n"))
+			return
+		}
+
+		id, err := strconv.Atoi(tab[0]) // récupère l'id
+		if err != nil {
+			cnx.Write([]byte("Erreur: ID invalide\n"))
+			return
+		}
+
+		f := tab[1]                      // récupère la méthode
+		canalRetour := make(chan string) // crée un canal de retour
 		go func() {
 			mainteneur(f, id, canalRetour) // lance le mainteneur
 		}()
-		result := <-canalRetour          // recupere le resultat du mainteneur
-		cnx.Write([]byte(result + "\n")) // envoie le resultat au client
-
+		result := <-canalRetour          // récupère le résultat du mainteneur
+		cnx.Write([]byte(result + "\n")) // envoie le résultat au client
 	}
 }
 
