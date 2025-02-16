@@ -44,6 +44,21 @@ cargo run
 go run main.go .\stop_times.txt
 ```
 
- 
+ ### 📂 TME4
+ ### Partie 1
+```
+go run client.go 1000
+```
+### Partie 2 
+## Faut d'abord lancé le serveur 
+```
+go run serveur.go 5000
+```
+## Aprés sera le tour du client
+```
+go run client.go 5000 1000
+```
+
+
 
 
