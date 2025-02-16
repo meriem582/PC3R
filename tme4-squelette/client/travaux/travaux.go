@@ -3,7 +3,7 @@ package travaux
 import (
 	"math/rand"
 
-	st "../structures"
+	st "tme4/client/structures"
 )
 
 var noms = []string{"BALKANY", "CAHUZAC", "TAPIE", "FERRAND", "GUEANT"}
