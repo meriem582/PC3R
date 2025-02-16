@@ -33,8 +33,9 @@ func creer(id int) *personne_serv {
 	// A FAIRE
 	p := pers_vide
 	tabaFaire := make([]func(st.Personne) st.Personne, 0)
-	nvp := personne_serv{statut: "v", tabAFaire: tabaFaire, personne: p}
+	nvp := personne_serv{statut: "V", tabAFaire: tabaFaire, personne: p}
 	idServ[id] = &nvp
+	fmt.Println("Création de la personne", id, nvp.vers_string())
 	return &nvp
 }
 
@@ -43,11 +44,12 @@ func creer(id int) *personne_serv {
 // (par exemple en initialisant toujours à la meme personne plutôt qu'en lisant un fichier)
 func (p *personne_serv) initialise() {
 	// A FAIRE
-	p.personne = st.Personne{Nom: "Doe", Prenom: "John", Age: 42, Sexe: "M"}
+	p.personne = st.Personne{Nom: "Doe", Prenom: "John", Age: 42, Sexe: "HOMME"}
 	for i := 0; i <= rand.Intn(6); i++ {
 		p.tabAFaire = append(p.tabAFaire, tr.UnTravail())
 	}
 	p.statut = "R"
+	fmt.Println("Initialisation de la personne", p.vers_string())
 }
 
 func (p *personne_serv) travaille() {
@@ -57,6 +59,7 @@ func (p *personne_serv) travaille() {
 	if len(p.tabAFaire) == 0 {
 		p.statut = "C"
 	}
+	fmt.Println("Travail de la personne", p.vers_string())
 }
 
 func (p *personne_serv) vers_string() string {
@@ -80,21 +83,20 @@ func (p *personne_serv) donne_statut() string {
 // et il appelle la méthode correspondante de la personne_serv correspondante
 func mainteneur(f string, id int, canalRetour chan string) {
 	// A FAIRE
-	if f == "creer" {
+	switch f {
+	case "creer":
 		creer(id)
-		canalRetour <- "OK"
-	} else if f == "initialise" {
+		canalRetour <- "ok"
+	case "initialise":
 		idServ[id].initialise()
-		canalRetour <- "OK"
-	} else if f == "travaille" {
+		canalRetour <- "ok"
+	case "travaille":
 		idServ[id].travaille()
-		canalRetour <- "OK"
-	} else if f == "vers_string" {
+		canalRetour <- "ok"
+	case "vers_string":
 		canalRetour <- idServ[id].vers_string()
-	} else if f == "donne_statut" {
+	case "donne_statut":
 		canalRetour <- idServ[id].donne_statut()
-	} else {
-		canalRetour <- "Methode inconnue"
 	}
 
 }
@@ -106,14 +108,14 @@ func gere_connection(cnx net.Conn) {
 	for {
 		m, _ := bufio.NewReader(cnx).ReadString('\n') // lit un message sur la socket
 		request := strings.TrimSuffix(m, "\n")        // récupère la requête du client
-		tab := strings.Split(request, ",")            // sépare la requête en deux parties
 
-		if len(tab) < 2 { // Vérifie que la requête est bien formée
-			cnx.Write([]byte("Erreur: requête invalide\n"))
-			return
+		if len(request) < 1 {
+			break
 		}
+		tab := strings.Split(request, ",") // sépare la requête en deux parties
+		id, err := strconv.Atoi(tab[0])    // récupère l'id
+		fmt.Println("Requête reçu de client: " + request)
 
-		id, err := strconv.Atoi(tab[0]) // récupère l'id
 		if err != nil {
 			cnx.Write([]byte("Erreur: ID invalide\n"))
 			return

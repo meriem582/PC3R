@@ -198,7 +198,7 @@ func proxy(port string, canal chan chanDeMessageDist) {
 	address := ADRESSE + ":" + port
 	conn, err := net.Dial("tcp", address)
 	if err != nil {
-		log.Fatalf("Erreur de connexion à %s : %v", address, err)
+		log.Fatalf("Erreur de connexion au serveur: %v", err)
 	}
 	for {
 		message := <-canal
@@ -295,9 +295,9 @@ func producteur(cInGestion chan personne_int, lectureDuChan chan chanDeMessage) 
 // utilisé pour retrouver l'object sur le serveur
 // la creation sur le client d'une personne_dist doit declencher la creation sur le serveur d'une "vraie" personne, initialement vide, de statut V
 
-func producteur_distant(cInGestion chan personne_int, canal chan chanDeMessageDist, idfraischan int) {
+func producteur_distant(cInGestion chan personne_int, canal chan chanDeMessageDist, idfraischan chan int) {
 	for {
-		id := idfraischan
+		id := <-idfraischan
 		nv_personne := personne_dist{id: id, canalLectureDist: canal}
 		retour := make(chan string)
 		canal <- chanDeMessageDist{id: id, canalRetour: retour, methode: "creer"}
@@ -439,15 +439,15 @@ func main() {
 	// lancer les goroutines (partie 2): des producteurs distants, un proxy
 	go func() { proxy(port, request) }()
 	go func() {
-		idfraischan <- 0
+		compteur := 0
 		for {
-			id := <-idfraischan
-			idfraischan <- id + 1
+			idfraischan <- compteur
+			compteur++
 		}
 	}()
 	for i := 0; i < NB_PD; i++ {
 		go func() {
-			producteur_distant(cInProdGestion, request, <-idfraischan)
+			producteur_distant(cInProdGestion, request, idfraischan)
 		}()
 	}
 
