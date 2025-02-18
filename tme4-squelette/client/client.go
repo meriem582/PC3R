@@ -46,7 +46,7 @@ type personne_emp struct {
 	personne     st.Personne                       // la personne
 	ligne        int                               // le numero de ligne dans le fichier source
 	tabAFaire    []func(p st.Personne) st.Personne //ici on stocke les fonctions des personnes à appliquer sur une personne
-	statut       string                            // Vide , EnCours ou Fini
+	statut       string                            // V pour vide, R pour rempli, C pour complet
 	canalLecture chan chanDeMessage                // canal de communication avec le lecteur
 }
 
