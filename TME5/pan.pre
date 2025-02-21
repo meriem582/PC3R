@@ -1,0 +1,88 @@
+# 0 "Feu_Tricolore.pml"
+# 0 "<built-in>"
+# 0 "<command-line>"
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+# 0 "<command-line>" 2
+# 1 "Feu_Tricolore.pml"
+
+
+
+mtype {VERT, ORANGE , ROUGE, INDETERMINEE}
+chan observateur_feu = [0] of {mtype,bool}
+
+active proctype Feu_Tricolore() {
+    bool clignotement = false;
+    mtype couleur = INDETERMINEE;
+
+    initial:
+        couleur = ORANGE;
+        clignotement = true;
+
+
+
+        if
+
+        :: true -> clignotement = false; goto rouge;
+
+        :: true -> goto initial;
+        fi
+    rouge:
+
+
+
+        atomic {
+            couleur = ROUGE;
+            observateur_feu!couleur, clignotement;
+        }
+
+
+        if
+        :: true -> goto vert;
+        :: true -> goto enpanne;
+        :: true -> goto rouge;
+        fi
+    vert:
+        atomic {
+            couleur = VERT;
+            observateur_feu!couleur, clignotement;
+        }
+        if
+        :: true -> goto orange;
+        :: true -> goto enpanne;
+        :: true -> goto vert;
+        fi
+    orange:
+        atomic {
+            couleur = ORANGE;
+            observateur_feu!couleur, clignotement;
+        }
+        if
+        :: true -> goto rouge;
+        :: true -> goto enpanne;
+        :: true -> goto orange;
+        fi
+
+    enpanne:
+        clignotement = true;
+    panne_sans_arret :
+        couleur = ORANGE;
+        observateur_feu!couleur, clignotement;
+        if
+        :: true -> goto panne_sans_arret;
+        fi
+}
+
+active proctype Observateur() {
+    mtype couleur_actuelle, couleur_precedente;
+    bool clignt;
+    couleur_precedente = INDETERMINEE;
+    do
+    :: observateur_feu?(couleur_actuelle, clignt) ->
+        if
+        :: atomic {couleur_actuelle == ORANGE -> assert(clignt == true || couleur_precedente != ROUGE); couleur_precedente = ORANGE}
+        :: atomic {couleur_actuelle == ROUGE -> assert(couleur_precedente != VERT); couleur_precedente = ROUGE}
+        :: atomic {couleur_actuelle == VERT -> assert(couleur_precedente != ORANGE); couleur_precedente = VERT}
+        :: atomic {clignt -> assert(couleur_precedente == ORANGE)}
+        fi
+    od
+}
