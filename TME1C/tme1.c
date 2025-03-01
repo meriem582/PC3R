@@ -86,10 +86,10 @@ void enfiler(struct tapis * tapis, struct paquet * paquet){
     // verrouiller le mutex 
     pthread_mutex_lock(&tapis->mutex);
     while(estPlein(tapis)){
-        pthread_cond_wait(&tapis->condProd, &tapis->mutex);
+        pthread_cond_wait(&tapis->condProd, &tapis->mutex); // Les arguments sont le pointeur de la condition et le pointeur du mutex
     }
     if(estVide(tapis)){
-        pthread_cond_signal(&tapis->condCons);
+        pthread_cond_signal(&tapis->condCons); // on signale que le tapis n'est plus vide à un consomateur qui attend 
     }
     tapis->fifo[ (tapis->debut + tapis->quantite
     ) % tapis->capacite ] = paquet;
