@@ -5,21 +5,18 @@ import (
 	"time"
 )
 
-// Future encapsule le résultat d'un calcul et un canal pour signaler sa disponibilité.
-type Future struct {
+type Future struct { // Future encapsule le résultat d'un calcul et un canal pour signaler sa disponibilité.
 	result int
 	ready  chan struct{} // Canal fermé lorsque le résultat est prêt. veut dire que en vrai
 }
 
-// NewFuture crée une nouvelle future.
-func NewFuture() *Future {
+func NewFuture() *Future { // NewFuture crée une nouvelle future.
 	return &Future{
 		ready: make(chan struct{}),
 	}
 }
 
-// Poll permet de consulter le résultat de façon non bloquante.
-// Si le résultat est prêt, il est retourné avec true, sinon false.
+// Poll permet de consulter le résultat de façon non bloquante. Si le résultat est prêt, il est retourné avec true, sinon false.
 func (f *Future) Poll() (int, bool) {
 	select {
 	case <-f.ready:
@@ -62,15 +59,10 @@ func serveur(calcChan chan CalcRequest) {
 		}(req)
 	}
 }
-
 func main() {
-	// Création du canal de requêtes de calcul.
-	calcChan := make(chan CalcRequest)
-	// Lancement du serveur.
-	go serveur(calcChan)
-
-	// Le client soumet un calcul (ici une fonction qui simule un délai).
-	fut := client(calcChan, func() int {
+	calcChan := make(chan CalcRequest)   // Création du canal de requêtes de calcul.
+	go serveur(calcChan)                 // Lancement du serveur.
+	fut := client(calcChan, func() int { // Le client soumet un calcul (ici une fonction qui simule un délai).
 		time.Sleep(2 * time.Second)
 		return 42
 	})
