@@ -1,0 +1,57 @@
+open Event
+
+(* Fonction principale du processus P *)
+let processus_p canaux_owners canal_stop canal_sortie =
+  let max_val = ref min_int in
+  let max_owner = ref "" in
+
+  (* Crée les événements d'écoute pour chaque canal *)
+  let rec ecouter () =
+    let events = List.map (fun (c, owner) -> wrap (receive c) (fun v -> (v, owner))) canaux_owners in
+    let events = choose ((wrap (receive canal_stop) (fun () -> `Stop)) :: events) in
+    match events with
+    | `Stop ->
+      (* Envoyer le propriétaire associé à la plus grande valeur *)
+      sync (send canal_sortie !max_owner);
+      Printf.printf "Arrêt du processus. Propriétaire max : %s\n" !max_owner
+    | (v, owner) ->
+      (* Mettre à jour la plus grande valeur et son propriétaire *)
+      if v > !max_val then begin
+        max_val := v;
+        max_owner := owner
+      end;
+      Printf.printf "Reçu %d de %s\n" v owner;
+      ecouter ()
+  in
+  ecouter ()
+
+(* Exemple d'exécution *)
+let () =
+  let c0 = new_channel () in
+  let c1 = new_channel () in
+  let c2 = new_channel () in
+  let canal_stop = new_channel () in
+  let canal_sortie = new_channel () in
+
+  let canaux_owners = [ (c0, "Alice"); (c1, "Bob"); (c2, "Charlie") ] in
+
+  (* Démarrer le processus P *)
+  let _ = Thread.create (fun () -> processus_p canaux_owners canal_stop canal_sortie) () in
+
+  (* Simuler des envois sur les canaux *)
+  let envoyer_valeurs canal valeurs =
+    List.iter (fun v -> sync (send canal v); Thread.delay 0.5) valeurs
+  in
+
+  (* Envoi asynchrone sur les canaux *)
+  let _ = Thread.create (fun () -> envoyer_valeurs c0 [10; 20; 5]) () in
+  let _ = Thread.create (fun () -> envoyer_valeurs c1 [15; 25; 30]) () in
+  let _ = Thread.create (fun () -> envoyer_valeurs c2 [5; 40; 3]) () in
+
+  (* Arrêter après un délai *)
+  Thread.delay 5.0;
+  sync (send canal_stop ());
+
+  (* Récupérer et afficher le résultat *)
+  let proprietaire_max = sync (receive canal_sortie) in
+  Printf.printf "Propriétaire avec la plus grande valeur : %s\n" proprietaire_max
