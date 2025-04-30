@@ -1,0 +1,324 @@
+*** Exo 01 :  Esterel Examen 2021-2022 ***
+
+*** Question 01 : ***
+
+*** Entree de musée  ( même code pour la sortie de musée ) ***
+module Entree:
+  input Sensor, Alarm, Reset;
+  output TryEnter;
+  constant K : integer;
+
+  var queue : integer := 0 in
+  every immediate present Alarm then
+    await Reset;
+  end present
+  do
+    present Sensor then
+      queue := queue + 1;
+    end present;
+
+    loop
+      pause;
+      if queue > 0 then
+        emit TryEnter;
+        queue := queue - 1;
+        await K ticks;
+      else
+        pause;
+      end if;
+    end loop
+  end every
+end module
+
+*** Controlleur ***
+
+module MuseumController:
+  input TryEnter1, TryEnter2, TryEnter3;
+  input TryExit1, TryExit2;
+  input Alarm, Reset;
+  output CloseEntries, OpenEntries;
+
+  constant N : integer;
+
+  var peopleInside : integer := 0 in
+  every immediate present Alarm then
+    emit CloseEntries;
+    await Reset;
+    emit OpenEntries;
+  end present
+  do
+    loop
+      pause;
+      if peopleInside < N then
+        present TryEnter1 then peopleInside := peopleInside + 1; end present;
+        present TryEnter2 then peopleInside := peopleInside + 1; end present;
+        present TryEnter3 then peopleInside := peopleInside + 1; end present;
+      end if;
+
+      present TryExit1 then peopleInside := peopleInside - 1; end present;
+      present TryExit2 then peopleInside := peopleInside - 1; end present;
+
+      if peopleInside >= N then
+        emit CloseEntries;
+      else
+        emit OpenEntries;
+      end if;
+    end loop
+  end every
+end module
+
+*** Question 02 :  Ajouter au systeme un module qui calcule a chaque instant, le nombre moyen de visiteur depuis louverture du musee (cest a dire la somme des visiteurs a chaque instant divisee par le nombre d instants). ***
+
+module AverageVisitorCalculator:
+  input Clock;                 % signal d'horloge ou pause rythmée
+  input PeopleInside : integer;  % nombre actuel de visiteurs dans le musée
+  output AvgVisitors : integer; % moyenne entière des visiteurs
+
+  var tickCount : integer := 0;
+  var totalPeopleSum : integer := 0;
+  var average : integer := 0;
+in
+  loop
+    await Clock;
+    tickCount := tickCount + 1;
+    totalPeopleSum := totalPeopleSum + PeopleInside;
+    average := totalPeopleSum / tickCount;
+    emit AvgVisitors(average);
+  end loop
+end module
+
+
+*** Question 03  : Ajouter un module qui ouvre une nouvelle une entree lorsque le nombre de personnes dans les les dentrees est plus grand que M. ****
+
+*** Premiere etape : on doit ajouter un signal à emettre dans entre ***
+Output TailleQueue1 : integer
+
+à chaque fois on fait emit( TailleQueue1(queue))
+
+Module EntreOpenner : 
+input TailleQueue1 : integer;
+input TailleQueue2 : integer;
+input TailleQueue3 : integer;
+
+output OpenImeediatlyEntry;
+constant M : integer;
+
+var total : integer  in 
+loop
+pause;
+total :=0
+
+present TailleQueue1 then total := total + ?TailleQueue1 end present;
+present TailleQueue2 then total := total + ?TailleQueue2 end present;
+present TailleQueue3 then total := total + ?TailleQueue3 end present;
+
+if total > M then
+emit (OpenImeediatlyEntry);
+
+end if
+end loop
+end var
+end module
+
+*** Ensuite on peut utiliser le signal OpenImeediatlyEntry pour lancer un nouvelle  entrée  ***
+
+Module LancerEntry :
+
+input OpenImeediatlyEntry;
+
+loop
+await OpenImeediatlyEntry;
+run Entree [ .......... ]
+
+pause;
+end loop
+
+
+
+
+
+
+*** Exo 02 : ***
+
+*** 1- Schema : *** 
+
+*** 2- UseCase : ***
+- Bob s'authentifie en tant que enseignant.
+- Bob est dans la page d'accueil , Bob clique sur le button de créer un QCM.
+- Bob est derigé à la page de QCM , ensuite choisi la liste des étudiants concerné en se diregant à une page ou il y'a la liste des etudiant et choisi par button (check-box) ensutie il valide et il est redirigé vers la page de QCM.
+- Bob choisi le bareme par un input dans la page  de QCM.
+- Bob choisi une fenetre des fenetre où ils seront re-utilisable.
+
+
+- Alice s'authentifie en tant que étudiant.
+- Alice sera derigé dans la page d'accueil , clique sur le button des liste de QCM disponible et il sera enusite derigé vers une page des liste QCM disponible , alice choisi un QCM et derigé vers une page de QCM et repondra au questionnaire et revenir à la page de l'accueil.
+- Alice clique sur le button des liste de QCM déjà fait , et elle sera derigé vers la liste des QCM faits
+- Alice peut voir son Score 
+- Alice peut voir un tableau spécial des scores des meilleurs étudiants dans l'application.
+
+
+*** 3- DB : ***
+Etudiant ( ID_etudiant , numero_etudiant ,  nom_etudiant , prenom_etudiant , Score_final )
+Enseignant ( Id_enseignant , numero_enseignant ,  nom_enseignant , prenom_enseignant  )
+QCM( id_QCM , contenu_QCM , bareme ,  #id_enseignant )
+Resultat( id_resultat , #id_etudiant , #id_QCM , Score_QCM ) ***Cette table présente les listes des QCM déjà faits***
+
+*** 4- Rest API :  ***
+Etudiant : 
+GET id -> recupere l'etudiant qui possède l'id_etudiant=id
+ 
+Enseignant : 
+GET id  -> recupere l'enseignant dont id_enseignant=id
+
+QCM : 
+GET id -> recupere le QCM dont id_QCM=id
+GET id_enseignant -> recupere tout les QCM crée par un enseignant 
+POST contenu_QCM , bareme , id_enseignant : crée un QCM avec un bareme et l'id de l'enseignant qui l'a crée
+DELETE id -> supprime le QCM dont l'id_QCM = id
+
+Resultat : 
+GET id -> recuepre le resultat dont l'id_resultat = id 
+GET id_etudiant -> recupere tout les QCM déjà faits par l'etudiant id_etudiant
+GET id_QCM -> recupere tout les résultats d'un  QCM 
+
+
+*** 5- Servelets / Handlers : ***
+
+http.HandleFunc("/Etudiant", handlers.EtudiantHandler)
+http.HandleFunc("/Enseignant", handlers.EnseignantHandler)
+http.HandleFunc("/QCM", handlers.EnseignantHandler)
+http.HandleFunc("/Resultat", handlers.ResultatHandler)
+
+
+
+*** 6- Handlers ***
+
+func EtudiantHandler ( w http.ResponseWriter, r *http.Request) {
+    switch r.method : {
+    case http.MethodGet : 
+        handlerGetEtudiant (w,r)
+    case http.MethodPOST : 
+        handlerPostEtudiant(w,r)
+    case http.MethodUPDATE : 
+        handlerUpdateEtudiant(w,r)
+    case http.MethodDELETE : 
+        handlerDeleteEtudiant(w,r)   
+    }
+}
+
+func handlerGetEtudiant (w http.ResponseWriter, r *http.Request) {
+
+
+    var input struct  {
+        id int `json:"id_etudiant"`
+    }
+    
+    if err := json.NewDecoder(r.body).Decode(&input); err != nil {
+        http.Error(w,"Invalid input ",http.StatusBadRequest)
+        return 
+    }
+    _,err := db.Exec ("SELECT id_etudiant , nom_etudiant, prenom_etudiant  where id_etudiant = $1",input.id)
+    if err != nil {
+        http.Error(w,"Error SELECT ")
+        return
+    }
+    
+    w.writeHeader(http.StatusOk)
+
+
+
+}
+
+*** 7- Client :  ***
+
+fetch('/api/qcm/disponibles', {
+  headers: { 'Authorization': 'Bearer ' + token }
+}).then(res => res.json()).then(data => afficherQCM(data));
+
+
+
+
+*** 8- Code pour afficher et maintenir à jour le tableau des scores : ***
+
+<div id="scoreboard">
+  <h2>Classement des meilleurs étudiants</h2>
+  <table id="scoreTable">
+    <thead>
+      <tr><th>Nom</th><th>Score</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+
+function chargerScores() {
+  fetch('/api/scores/top', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+    .then(res => res.json())
+    .then(scores => afficherScores(scores));
+
+}
+
+
+
+function afficherScores(scores) {
+  const tbody = document.querySelector('#scoreTable tbody');
+  tbody.innerHTML = '';
+  scores.forEach(entry => {
+    const row = document.createElement('tr');
+    row.innerHTML = `<td>${entry.nom}</td><td>${entry.score}</td>`;
+    tbody.appendChild(row);
+  });
+}
+
+// Fonction d’actualisation régulière
+function mettreAJourScores() {
+  fetch('/api/scores/top', {
+    headers: { 'Authorization': 'Bearer ' + token }
+  })
+  .then(response => response.json())
+  .then(afficherScores)
+  .catch(error => console.error("Erreur lors de la mise à jour des scores :", error));
+}
+
+
+
+*** Exo 03  *** 
+
+
+
+*** Premiere Question : ***
+node Quest1(X:int) returns (Y:int)
+var
+  y1, y2: int;
+
+let 
+y1 = 0 -> pre y;
+y2 = 0 -> 0 -> pre y1
+Y = X -> (pre Y + X) fby ( pre y +  + x)
+tel
+
+
+*** Deuxieme Question :  ***
+
+node Quest2(X:int,b:bool) returns (Y:int)
+
+VAR
+
+let 
+*** On détecte le front montant et on memorise la valeur x au moment ou b est devenu true. ***
+b_prev = false -> b 
+front = b and not b_prev
+
+mem = if front then X else pre mem 
+
+Y= if b then mem else x
+
+tel
+
+
+X = 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+b = false false false true true true true false
+Y= 1 2 3 4 4 4 4 8 9 10 11 
+
